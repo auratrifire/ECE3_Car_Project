@@ -13,8 +13,8 @@ const int front_left_LED = 41;
 const int back_left_LED = 57;
 const int back_right_LED = 58;
 
-const float K_p= 2.1;
-const float K_d = 2.1;
+const float K_p= 8;
+const float K_d = 7;
 const int basePow=64;
 float d=0;
 float prevSum=0;
@@ -94,14 +94,14 @@ void loop() {
 
   delayMicroseconds(600);
 
-  ref[0] = digitalRead(65);
-  ref[1] = digitalRead(48);
-  ref[2] = digitalRead(64);
-  ref[3] = digitalRead(47);
-  ref[4] = digitalRead(52);
-  ref[5] = digitalRead(68);
-  ref[6] = digitalRead(53);
-  ref[7] = digitalRead(69);
+  ref[0] = digitalRead(65)^1;
+  ref[1] = digitalRead(48)^1;
+  ref[2] = digitalRead(64)^1;
+  ref[3] = digitalRead(47)^1;
+  ref[4] = digitalRead(52)^1;
+  ref[5] = digitalRead(68)^1;
+  ref[6] = digitalRead(53)^1;
+  ref[7] = digitalRead(69)^1;
 
   leftCount = getEncoderCount_left();
   rightCount = getEncoderCount_right();
@@ -131,9 +131,9 @@ void loop() {
   }
   Serial.print('\n');
  */
-weightedSum=ref[0]*1.75+ref[1]*1.25+ref[2]*0.75+ref[3]*0.25-ref[4]*0.25-ref[5]*0.75-ref[6]*1.25-ref[7]*1.75;
+  weightedSum=ref[0]*1.75+ref[1]*1.25+ref[2]*0.75+ref[3]*0.25-ref[4]*0.25-ref[5]*0.75-ref[6]*1.25-ref[7]*1.75;
 
-  if( ((ref[0] + ref[1] + ref[2] + ref[3] + ref[4] + ref[5] + ref[6] + ref[7]) <= 1 ) && (pulseCount < 14000) && (pulseCount > 6700) && (donutFlag == 0))
+  if( ((ref[0] + ref[1] + ref[2] + ref[3] + ref[4] + ref[5] + ref[6] + ref[7]) >= 7 ) && (pulseCount > 4000) && (donutFlag == 0))
   {
     //Serial.print("U turn");
     //Serial.print('\n');
@@ -144,18 +144,19 @@ weightedSum=ref[0]*1.75+ref[1]*1.25+ref[2]*0.75+ref[3]*0.25-ref[4]*0.25-ref[5]*0
     analogWrite(left_pwm_pin, 64);
     analogWrite(right_pwm_pin, 64);
     donutFlag = 1;
-    delay(1100);
+    delay(1000);
     digitalWrite(left_dir_pin, LOW);
     digitalWrite(right_dir_pin, LOW);
     delay(500);
   }
+  
   else{
-   digitalWrite(left_dir_pin, LOW);
+    digitalWrite(left_dir_pin, LOW);
     digitalWrite(right_dir_pin, LOW);
-   analogWrite(right_pwm_pin, basePow+weightedSum*K_p-d*K_d);
-  analogWrite(left_pwm_pin, basePow-weightedSum*K_p+d*K_d);
-  d=prevSum-weightedSum;
-  prevSum=weightedSum;
+    analogWrite(right_pwm_pin, 1.042*(basePow+weightedSum*K_p-d*K_d));
+    analogWrite(left_pwm_pin, basePow-weightedSum*K_p+d*K_d);
+    d=prevSum-weightedSum;
+    prevSum=weightedSum;
   }
 }
 
