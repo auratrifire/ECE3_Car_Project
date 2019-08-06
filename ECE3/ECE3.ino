@@ -54,6 +54,9 @@ void setup() {
   pinMode(PUSH2, INPUT_PULLUP);
   attachInterrupt(PUSH2, button, FALLING); 
 
+    digitalWrite(left_nslp_pin, HIGH); 
+    digitalWrite(right_nslp_pin, HIGH); 
+
   donutFlag = 0;
 }
 
@@ -127,7 +130,7 @@ void loop() {
     Serial.print('\t'); // tab to format the raw data into columns in the Serial monitor
   }
   Serial.print('\n');
-  */
+ */
 weightedSum=ref[0]*1.75+ref[1]*1.25+ref[2]*0.75+ref[3]*0.25-ref[4]*0.25-ref[5]*0.75-ref[6]*1.25-ref[7]*1.75;
 
   if( ((ref[0] + ref[1] + ref[2] + ref[3] + ref[4] + ref[5] + ref[6] + ref[7]) <= 1 ) && (pulseCount < 14000) && (pulseCount > 6700) && (donutFlag == 0))
@@ -146,11 +149,14 @@ weightedSum=ref[0]*1.75+ref[1]*1.25+ref[2]*0.75+ref[3]*0.25-ref[4]*0.25-ref[5]*0
     digitalWrite(right_dir_pin, LOW);
     delay(500);
   }
-  
+  else{
+   digitalWrite(left_dir_pin, LOW);
+    digitalWrite(right_dir_pin, LOW);
    analogWrite(right_pwm_pin, basePow+weightedSum*K_p-d*K_d);
   analogWrite(left_pwm_pin, basePow-weightedSum*K_p+d*K_d);
   d=prevSum-weightedSum;
   prevSum=weightedSum;
+  }
 }
 
 void button(){
