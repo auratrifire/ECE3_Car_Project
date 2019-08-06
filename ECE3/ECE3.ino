@@ -1,5 +1,10 @@
 #include <ECE3.h>
 
+#define LEDR RED_LED
+#define LEDG GREEN_LED
+#define LEDB BLUE_LED
+
+
 const int left_nslp_pin = 31;
 const int left_dir_pin = 29;
 const int left_pwm_pin = 40;
@@ -13,14 +18,14 @@ const int front_left_LED = 41;
 const int back_left_LED = 57;
 const int back_right_LED = 58;
 
-const float K_p= 8;
-const float K_d = 7;
-const int basePow=64;
+const float K_p= 9.4;
+const float K_d = 7.0;
+const int basePow=57;
 float d=0;
 float prevSum=0;
 float weightedSum=0;
 
-
+int counter;
 int ref[8];
 int leftCount;
 int rightCount;
@@ -31,6 +36,11 @@ void setup() {
   // put your setup code here, to run once:
   ECE3_Init();
   Serial.begin(9600);
+pinMode(LEDR, OUTPUT);
+pinMode(LEDG, OUTPUT);
+pinMode(LEDB, OUTPUT);
+
+  
   pinMode(even_LED, OUTPUT);
   pinMode(odd_LED, OUTPUT);
   pinMode(front_right_LED, OUTPUT);
@@ -58,6 +68,7 @@ void setup() {
     digitalWrite(right_nslp_pin, HIGH); 
 
   donutFlag = 0;
+  counter=0;
 }
 
 void loop() {
@@ -81,7 +92,7 @@ void loop() {
   digitalWrite(53, HIGH);
   digitalWrite(69, HIGH);
   
-  delayMicroseconds(10000);
+  delayMicroseconds(50);
 
   pinMode(65, INPUT);
   pinMode(48, INPUT);
@@ -92,16 +103,16 @@ void loop() {
   pinMode(53, INPUT);
   pinMode(69, INPUT);
 
-  delayMicroseconds(600);
+  delayMicroseconds(1500);
 
-  ref[0] = digitalRead(65)^1;
-  ref[1] = digitalRead(48)^1;
-  ref[2] = digitalRead(64)^1;
-  ref[3] = digitalRead(47)^1;
-  ref[4] = digitalRead(52)^1;
-  ref[5] = digitalRead(68)^1;
-  ref[6] = digitalRead(53)^1;
-  ref[7] = digitalRead(69)^1;
+  ref[0] = digitalRead(65);
+  ref[1] = digitalRead(48);
+  ref[2] = digitalRead(64);
+  ref[3] = digitalRead(47);
+  ref[4] = digitalRead(52);
+  ref[5] = digitalRead(68);
+  ref[6] = digitalRead(53);
+  ref[7] = digitalRead(69);
 
   leftCount = getEncoderCount_left();
   rightCount = getEncoderCount_right();
@@ -123,17 +134,22 @@ void loop() {
     digitalWrite(front_left_LED, HIGH);
   }
   
-/*
-  for (unsigned char i = 0; i < 8; i++) //0 is right side, 7 is left
-  {
-    Serial.print(ref[i]);
-    Serial.print('\t'); // tab to format the raw data into columns in the Serial monitor
-  }
-  Serial.print('\n');
- */
-  weightedSum=ref[0]*1.75+ref[1]*1.25+ref[2]*0.75+ref[3]*0.25-ref[4]*0.25-ref[5]*0.75-ref[6]*1.25-ref[7]*1.75;
 
-  if( ((ref[0] + ref[1] + ref[2] + ref[3] + ref[4] + ref[5] + ref[6] + ref[7]) >= 7 ) && (pulseCount > 4000) && (donutFlag == 0))
+//  for (unsigned char i = 0; i < 8; i++) //0 is right side, 7 is left
+//  {
+//    Serial.print(ref[i]);
+//    Serial.print('\t'); // tab to format the raw data into columns in the Serial monitor
+//  }
+//  Serial.print('\n');
+// 
+//
+//    digitalWrite(left_nslp_pin, LOW); 
+//    digitalWrite(right_nslp_pin, LOW);
+// 
+  weightedSum=ref[0]*1.75+ref[1]*1.25+ref[2]*0.75+ref[3]*0.25-ref[4]*0.25-ref[5]*0.75-ref[6]*1.25-ref[7]*1.75;
+  Serial.println(weightedSum);
+
+  if( ((ref[0] + ref[1] + ref[2] + ref[3] + ref[4] + ref[5] + ref[6] + ref[7]) >= 7 ) && (pulseCount > 3000))
   {
     //Serial.print("U turn");
     //Serial.print('\n');
@@ -144,20 +160,42 @@ void loop() {
     analogWrite(left_pwm_pin, 64);
     analogWrite(right_pwm_pin, 64);
     donutFlag = 1;
-    delay(1000);
+    delay(950);
     digitalWrite(left_dir_pin, LOW);
     digitalWrite(right_dir_pin, LOW);
-    delay(500);
+    delay(400);
   }
   
   else{
     digitalWrite(left_dir_pin, LOW);
     digitalWrite(right_dir_pin, LOW);
-    analogWrite(right_pwm_pin, 1.042*(basePow+weightedSum*K_p-d*K_d));
-    analogWrite(left_pwm_pin, basePow-weightedSum*K_p+d*K_d);
+    analogWrite(right_pwm_pin, 1.0*(basePow-weightedSum*K_p+d*K_d));
+    analogWrite(left_pwm_pin, basePow+weightedSum*K_p-d*K_d);
+    if(counter%100 == 0)
+    {
     d=prevSum-weightedSum;
     prevSum=weightedSum;
+    }
+    if((basePow+weightedSum*K_p-d*K_d)>(basePow-weightedSum*K_p+d*K_d))
+    {
+      digitalWrite(LEDB, LOW);
+      digitalWrite(LEDG, LOW);
+      digitalWrite(LEDR, HIGH);
+    }
+    else if(basePow-weightedSum*K_p+d*K_d>basePow+weightedSum*K_p-d*K_d)
+    {
+      digitalWrite(LEDB, HIGH);
+      digitalWrite(LEDG, LOW);
+      digitalWrite(LEDR, LOW);
+    }
+    else
+    {
+      digitalWrite(LEDB, LOW);
+      digitalWrite(LEDG, HIGH);
+      digitalWrite(LEDR, LOW);
+    }
   }
+  counter++;
 }
 
 void button(){
