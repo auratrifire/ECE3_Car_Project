@@ -18,8 +18,8 @@ const int front_left_LED = 41;
 const int back_left_LED = 57;
 const int back_right_LED = 58;
 
-const float K_p= 9.4;
-const float K_d = 7.0;
+const float K_p= 8.0;
+const float K_d = 8.0;
 const int basePow=57;
 float d=0;
 float prevSum=0;
@@ -169,7 +169,7 @@ void loop() {
   else{
     digitalWrite(left_dir_pin, LOW);
     digitalWrite(right_dir_pin, LOW);
-    analogWrite(right_pwm_pin, 1.0*(basePow-weightedSum*K_p+d*K_d));
+    analogWrite(right_pwm_pin, 1.42*(basePow-weightedSum*K_p+d*K_d));
     analogWrite(left_pwm_pin, basePow+weightedSum*K_p-d*K_d);
     if(counter%100 == 0)
     {
