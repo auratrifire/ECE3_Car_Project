@@ -4,7 +4,6 @@
 #define LEDG GREEN_LED
 #define LEDB BLUE_LED
 
-
 const int left_nslp_pin = 31;
 const int left_dir_pin = 29;
 const int left_pwm_pin = 40;
@@ -116,19 +115,19 @@ void loop() {
   leftCount = getEncoderCount_left();
   rightCount = getEncoderCount_right();
   pulseCount = (leftCount+rightCount)/2;
-  if(pulseCount > 15000)
+  if(pulseCount > 20000)
   {
     digitalWrite(back_right_LED, HIGH);
   }
-  else if (pulseCount > 14500)
+  else if (pulseCount > 19000)
   {
     digitalWrite(back_left_LED, HIGH);
   }
-  else if(pulseCount > 14000)
+  else if(pulseCount > 18000)
   {
     digitalWrite(front_right_LED, HIGH);
   }
-  else if(pulseCount > 8000)
+  else if(pulseCount > 9000)
   {
     digitalWrite(front_left_LED, HIGH);
   }
@@ -172,6 +171,7 @@ void loop() {
       d=prevSum-weightedSum;
       prevSum=weightedSum;
     }
+    /*
     if((basePow + weightedSum*K_p - d*K_d) > (basePow - weightedSum*K_p + d*K_d))
     {
       digitalWrite(LEDB, LOW);
@@ -190,6 +190,7 @@ void loop() {
       digitalWrite(LEDG, HIGH);
       digitalWrite(LEDR, LOW);
     }
+    */
   }
   counter++;
 }
