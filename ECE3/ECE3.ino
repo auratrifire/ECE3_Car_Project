@@ -17,15 +17,16 @@ const int front_left_LED = 41;
 const int back_left_LED = 57;
 const int back_right_LED = 58;
 
-const float K_p= 15;
-const float K_d = 7;
-const int basePow=70;
+const float K_p= 21.5;
+const float K_d = 11;
+const int basePow=100;
 float d=0;
 float prevSum=0;
 float weightedSum=0;
 
 int counter;
 int ref[8];
+int lastSeen[2];
 int leftCount;
 int rightCount;
 int pulseCount;
@@ -34,7 +35,7 @@ int donutFlag;
 void setup() {
   // put your setup code here, to run once:
   ECE3_Init();
-  Serial.begin(9600);
+  //Serial.begin(9600);
   pinMode(LEDR, OUTPUT);
   pinMode(LEDG, OUTPUT);
   pinMode(LEDB, OUTPUT);
@@ -101,7 +102,7 @@ void loop() {
   pinMode(53, INPUT);
   pinMode(69, INPUT);
 
-  delayMicroseconds(1500);
+  delayMicroseconds(850);
 
   ref[0] = digitalRead(65);
   ref[1] = digitalRead(48);
@@ -146,19 +147,49 @@ void loop() {
 
   if( ((ref[0] + ref[1] + ref[2] + ref[3] + ref[4] + ref[5] + ref[6] + ref[7]) >= 7 ) && (pulseCount > 3000))
   {
-    //Serial.print("U turn");
-    //Serial.print('\n');
-    digitalWrite(left_dir_pin, LOW);
-    digitalWrite(right_dir_pin, HIGH);
-    digitalWrite(left_nslp_pin, HIGH); 
-    digitalWrite(right_nslp_pin, HIGH); 
-    analogWrite(left_pwm_pin, 64);
-    analogWrite(right_pwm_pin, 64);
-    donutFlag = 1;
-    delay(880);
-    digitalWrite(left_dir_pin, LOW);
-    digitalWrite(right_dir_pin, LOW);
-    delay(400);
+    if(donutFlag == 1)
+    {
+      digitalWrite(left_nslp_pin, LOW); 
+      digitalWrite(right_nslp_pin, LOW); 
+    }
+    else
+    {
+      //Serial.print("U turn");
+      //Serial.print('\n');
+      digitalWrite(left_dir_pin, LOW);
+      digitalWrite(right_dir_pin, HIGH);
+      digitalWrite(left_nslp_pin, HIGH); 
+      digitalWrite(right_nslp_pin, HIGH); 
+      analogWrite(left_pwm_pin, 128);
+      analogWrite(right_pwm_pin, 128);
+      donutFlag = 1;
+      delay(450);
+      digitalWrite(left_dir_pin, LOW);
+      digitalWrite(right_dir_pin, LOW);
+      analogWrite(left_pwm_pin, basePow);
+      analogWrite(right_pwm_pin, 1.065*basePow);
+      delay(300);
+    }
+  }
+
+  else if( (ref[0] + ref[1] + ref[2] + ref[3] + ref[4] + ref[5] + ref[6] + ref[7]) == 0 )
+  {
+    if(lastSeen[0] == 1)
+    {
+      digitalWrite(left_dir_pin, LOW);
+      digitalWrite(right_dir_pin, LOW);
+      analogWrite(left_pwm_pin, (basePow+5));
+      analogWrite(right_pwm_pin, 1.065*(basePow));
+      delay(100);
+    }
+    else if(lastSeen[1] == 1)
+    {
+      digitalWrite(left_dir_pin, LOW);
+      digitalWrite(right_dir_pin, LOW);
+      analogWrite(left_pwm_pin, (basePow));
+      analogWrite(right_pwm_pin, 1.065*(basePow+5));
+      delay(100);
+    }
   }
   
   else{
@@ -170,6 +201,11 @@ void loop() {
     {
       d=prevSum-weightedSum;
       prevSum=weightedSum;
+    }
+    if((ref[0] + ref[1] + ref[2] + ref[3] + ref[4] + ref[5] + ref[6] + ref[7]) == 1)
+    {
+      lastSeen[0] = ref[0];
+      lastSeen[1] = ref[7];
     }
     /*
     if((basePow + weightedSum*K_p - d*K_d) > (basePow - weightedSum*K_p + d*K_d))
