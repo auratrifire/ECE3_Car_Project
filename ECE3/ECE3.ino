@@ -18,9 +18,9 @@ const int front_left_LED = 41;
 const int back_left_LED = 57;
 const int back_right_LED = 58;
 
-const float K_p= 8.0;
-const float K_d = 8.0;
-const int basePow=57;
+const float K_p= 15;
+const float K_d = 7;
+const int basePow=70;
 float d=0;
 float prevSum=0;
 float weightedSum=0;
@@ -36,10 +36,9 @@ void setup() {
   // put your setup code here, to run once:
   ECE3_Init();
   Serial.begin(9600);
-pinMode(LEDR, OUTPUT);
-pinMode(LEDG, OUTPUT);
-pinMode(LEDB, OUTPUT);
-
+  pinMode(LEDR, OUTPUT);
+  pinMode(LEDG, OUTPUT);
+  pinMode(LEDB, OUTPUT);
   
   pinMode(even_LED, OUTPUT);
   pinMode(odd_LED, OUTPUT);
@@ -134,20 +133,17 @@ void loop() {
     digitalWrite(front_left_LED, HIGH);
   }
   
-
-//  for (unsigned char i = 0; i < 8; i++) //0 is right side, 7 is left
-//  {
-//    Serial.print(ref[i]);
-//    Serial.print('\t'); // tab to format the raw data into columns in the Serial monitor
-//  }
-//  Serial.print('\n');
-// 
-//
-//    digitalWrite(left_nslp_pin, LOW); 
-//    digitalWrite(right_nslp_pin, LOW);
-// 
+/*
+  for (unsigned char i = 0; i < 8; i++) //0 is right side, 7 is left
+  {
+    Serial.print(ref[i]);
+    Serial.print('\t'); // tab to format the raw data into columns in the Serial monitor
+  }
+  Serial.print('\n');
+*/
+ 
   weightedSum=ref[0]*1.75+ref[1]*1.25+ref[2]*0.75+ref[3]*0.25-ref[4]*0.25-ref[5]*0.75-ref[6]*1.25-ref[7]*1.75;
-  Serial.println(weightedSum);
+  //Serial.println(weightedSum);
 
   if( ((ref[0] + ref[1] + ref[2] + ref[3] + ref[4] + ref[5] + ref[6] + ref[7]) >= 7 ) && (pulseCount > 3000))
   {
@@ -160,7 +156,7 @@ void loop() {
     analogWrite(left_pwm_pin, 64);
     analogWrite(right_pwm_pin, 64);
     donutFlag = 1;
-    delay(950);
+    delay(880);
     digitalWrite(left_dir_pin, LOW);
     digitalWrite(right_dir_pin, LOW);
     delay(400);
@@ -169,20 +165,20 @@ void loop() {
   else{
     digitalWrite(left_dir_pin, LOW);
     digitalWrite(right_dir_pin, LOW);
-    analogWrite(right_pwm_pin, 1.42*(basePow-weightedSum*K_p+d*K_d));
-    analogWrite(left_pwm_pin, basePow+weightedSum*K_p-d*K_d);
+    analogWrite(right_pwm_pin, 1.065*(basePow - weightedSum*K_p + d*K_d));
+    analogWrite(left_pwm_pin, basePow + weightedSum*K_p - d*K_d);
     if(counter%100 == 0)
     {
-    d=prevSum-weightedSum;
-    prevSum=weightedSum;
+      d=prevSum-weightedSum;
+      prevSum=weightedSum;
     }
-    if((basePow+weightedSum*K_p-d*K_d)>(basePow-weightedSum*K_p+d*K_d))
+    if((basePow + weightedSum*K_p - d*K_d) > (basePow - weightedSum*K_p + d*K_d))
     {
       digitalWrite(LEDB, LOW);
       digitalWrite(LEDG, LOW);
       digitalWrite(LEDR, HIGH);
     }
-    else if(basePow-weightedSum*K_p+d*K_d>basePow+weightedSum*K_p-d*K_d)
+    else if(basePow - weightedSum*K_p + d*K_d > basePow + weightedSum*K_p - d*K_d)
     {
       digitalWrite(LEDB, HIGH);
       digitalWrite(LEDG, LOW);
