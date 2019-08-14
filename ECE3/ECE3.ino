@@ -18,7 +18,7 @@ const int back_left_LED = 57;
 const int back_right_LED = 58;
 
 const float K_p= 21.5;
-const float K_d = 11;
+const float K_d = 11.5;
 const int basePow=100;
 float d=0;
 float prevSum=0;
@@ -174,21 +174,13 @@ void loop() {
 
   else if( (ref[0] + ref[1] + ref[2] + ref[3] + ref[4] + ref[5] + ref[6] + ref[7]) == 0 )
   {
-    if(lastSeen[0] == 1)
+    if(lastSeen[0] == 1 && lastSeen[1] == 0)
     {
-      digitalWrite(left_dir_pin, LOW);
-      digitalWrite(right_dir_pin, LOW);
-      analogWrite(left_pwm_pin, (basePow+5));
-      analogWrite(right_pwm_pin, 1.065*(basePow));
-      delay(100);
+      weightedSum=4.5;
     }
-    else if(lastSeen[1] == 1)
+    else if(lastSeen[1] == 1 && lastSeen[0] == 0)
     {
-      digitalWrite(left_dir_pin, LOW);
-      digitalWrite(right_dir_pin, LOW);
-      analogWrite(left_pwm_pin, (basePow));
-      analogWrite(right_pwm_pin, 1.065*(basePow+5));
-      delay(100);
+      weightedSum=-4.5;
     }
   }
   
