@@ -18,7 +18,7 @@ const int back_left_LED = 57;
 const int back_right_LED = 58;
 
 const float K_p= 21.5;
-const float K_d = 11;
+const float K_d = 12;
 const int basePow=100;
 float d=0;
 float prevSum=0;
@@ -145,7 +145,7 @@ void loop() {
   weightedSum=ref[0]*1.75+ref[1]*1.25+ref[2]*0.75+ref[3]*0.25-ref[4]*0.25-ref[5]*0.75-ref[6]*1.25-ref[7]*1.75;
   //Serial.println(weightedSum);
 
-  if( ((ref[0] + ref[1] + ref[2] + ref[3] + ref[4] + ref[5] + ref[6] + ref[7]) >= 7 ) && (pulseCount > 3000))
+  if( ((ref[0] + ref[1] + ref[2] + ref[3] + ref[4] + ref[5] + ref[6] + ref[7]) >= 7 ) && (pulseCount > 5000))
   {
     if(donutFlag == 1)
     {
@@ -161,14 +161,14 @@ void loop() {
       digitalWrite(left_nslp_pin, HIGH); 
       digitalWrite(right_nslp_pin, HIGH); 
       analogWrite(left_pwm_pin, 128);
-      analogWrite(right_pwm_pin, 1.01*128);
+      analogWrite(right_pwm_pin, 1.04*128);
       donutFlag = 1;
-      delay(450);
+      delay(385);
       digitalWrite(left_dir_pin, LOW);
       digitalWrite(right_dir_pin, LOW);
       analogWrite(left_pwm_pin, basePow);
-      analogWrite(right_pwm_pin, 1.01*basePow);
-      delay(300);
+      analogWrite(right_pwm_pin, 1.04*basePow);
+      delay(150);
     }
   }
 /*
@@ -183,14 +183,14 @@ void loop() {
       weightedSum=-4.5;
     }
   }
-  */
+ */ 
   
   else{
     digitalWrite(left_dir_pin, LOW);
     digitalWrite(right_dir_pin, LOW);
     analogWrite(right_pwm_pin, 1.065*(basePow - weightedSum*K_p + d*K_d));
     analogWrite(left_pwm_pin, basePow + weightedSum*K_p - d*K_d);
-    if(counter%100 == 0)
+    if(counter%75 == 0)
     {
       d=prevSum-weightedSum;
       prevSum=weightedSum;
@@ -202,6 +202,7 @@ void loop() {
       lastSeen[1] = ref[7];
     }
     */
+    
     /*
     if((basePow + weightedSum*K_p - d*K_d) > (basePow - weightedSum*K_p + d*K_d))
     {
